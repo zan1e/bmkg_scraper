@@ -9,4 +9,6 @@ if request.status_code != 200:
     print(request.status_code)
     exit()
 
+soup = BeautifulSoup(request.text,"lxml")
 
+locations = soup.select('div.row.list-cuaca-provinsi.md-margin-bottom-10')
