@@ -25,11 +25,13 @@ def scrape_location_data(location):
     humidity = [location_table.select('tr > td:nth-child(5)')]
     date = location_soup.select_one('div.prakicu-kabkota.tab-v1 > ul > li:nth-child(1) > a').text
 
-    print(f'{location_title} - {date}',end="\n\n")
+    return {
+            'city' : location_title,
+            'date' : date,
+            }
 
 
 with concurrent.futures.ThreadPoolExecutor() as executor:
     results = [executor.submit(scrape_location_data,location) for location in locations]
     for future in concurrent.futures.as_completed(results):
-        print(future)
-
+        print(future.result())
