@@ -21,13 +21,18 @@ def scrape_location_data(location):
     location_soup = BeautifulSoup(request_location_page.text,"lxml")
     location_table = location_soup.select_one('#TabPaneCuaca1 > div > table ')
     cities = [location_table.select('tr > td > a')]
-    temp = [location_table.select('tr > td:nth-child(4)')]
-    humidity = [location_table.select('tr > td:nth-child(5)')]
+    temperatures = [location_table.select('tr > td:nth-child(4)')]
+    humidities = [location_table.select('tr > td:nth-child(5)')]
     date = location_soup.select_one('div.prakicu-kabkota.tab-v1 > ul > li:nth-child(1) > a').text
 
     return {
-            'city' : location_title,
+            'location' : location_title,
             'date' : date,
+            'cities' : [{
+                    'city_name' : cities[0][_].text,
+                    'temperature' : temperatures[0][_].text,
+                    'humidity': humidities[0][_].text
+                } for _ in range(len(cities[0]))]
             }
 
 
