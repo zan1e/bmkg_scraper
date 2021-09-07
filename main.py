@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
-
+import concurrent.futures
+import time
 
 URL = "https://www.bmkg.go.id/cuaca/prakiraan-cuaca-indonesia.bmkg"
 request = requests.get(URL)
@@ -9,12 +10,12 @@ if request.status_code != 200:
     print(request.status_code)
     exit()
 
+
 main_soup = BeautifulSoup(request.text,"lxml")
 
 locations = main_soup.select('div.row.list-cuaca-provinsi.md-margin-bottom-10 > div')
 
-i = 0
-for location in locations:
+def scrape_location_data(location):
     request_location_page = requests.get(f"https://www.bmkg.go.id/cuaca/prakiraan-cuaca-indonesia.bmkg{location.select_one('a')['href']}")
     location_title = location.select_one('a').text
     location_soup = BeautifulSoup(request_location_page.text,"lxml")
@@ -26,7 +27,9 @@ for location in locations:
 
     print(f'{location_title} - {date}',end="\n\n")
 
-    for i in range(len(cities[0])):
-        print(cities[0][i].text)
-        print(temp[0][i].text)
-        print(humidity[0][i].text)
+
+with concurrent.futures.ThreadPoolExecutor() as executor:
+    results = [executor.submit(scrape_location_data,location) for location in locations]
+    for future in concurrent.futures.as_completed(results):
+        print(future)
+
